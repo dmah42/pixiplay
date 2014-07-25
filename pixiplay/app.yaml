@@ -1,0 +1,15 @@
+application: stripysock-pixiplay
+version: 1
+runtime: go
+api_version: go1
+
+handlers:
+        - url: /templates
+          static_dir: templates
+          application_readable: true
+
+        - url: /js
+          static_dir: js
+
+        - url: /.*
+          script: _go_app
