@@ -29,8 +29,8 @@ var templateFuncs = map[string]interface{} {
 
 var rootTemplate = template.Must(template.ParseFiles("templates/index.html"))
 var scriptTemplate = template.Must(template.ParseFiles("templates/script.html")).Funcs(templateFuncs)
-var authorTemplate = template.Must(template.New("author").ParseFiles("templates/author.html"))
-var submitTemplate = template.Must(template.New("submit").ParseFiles("templates/submit.html"))
+var authorTemplate = template.Must(template.ParseFiles("templates/author.html"))
+var submitTemplate = template.Must(template.ParseFiles("templates/submit.html"))
 
 func init() {
 	http.HandleFunc("/", root)
@@ -39,12 +39,16 @@ func init() {
 	http.HandleFunc("/submit", submit)
 }
 
+func allScripts(c appengine.Context) (scripts []Script, err error) {
+	q := datastore.NewQuery("Script").Order("Name")
+	scripts = make([]Script, 0)
+	_, err = q.GetAll(c, &scripts)
+	return
+}
+
 func root(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
-
-	q := datastore.NewQuery("Script").Order("Name")
-	scripts := make([]Script, 0)
-	_, err := q.GetAll(c, &scripts)
+	scripts, err := allScripts(c)
 
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -102,7 +106,13 @@ func submit(w http.ResponseWriter, r *http.Request) {
 	c := appengine.NewContext(r)
 
 	if (r.Method == "GET") {
-		if err := submitTemplate.Execute(w, ""); err != nil {
+		scripts, err := allScripts(c)
+		if err != nil {
+			http.Error(w, err.Error(), http.StatusInternalServerError)
+			return
+		}
+
+		if err := submitTemplate.Execute(w, scripts); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
 		// TODO: 'test' link
