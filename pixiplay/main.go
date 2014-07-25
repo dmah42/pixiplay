@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"html/template"
 	"net/http"
-	"reflect"
 
 	"appengine"
 	"appengine/datastore"
@@ -13,22 +12,11 @@ import (
 type Script struct {
 	Name	string
 	Author	string
-	Content	string
-}
-
-var templateFuncs = map[string]interface{} {
-	"eq": func(a, b interface{}) bool {
-		switch a := a.(type) {
-		case string, int, int64, byte, float32, float64:
-			return a == b
-		}
-
-		return reflect.DeepEqual(a, b)
-	},
+	Content	string `datastore:",noindex"`
 }
 
 var rootTemplate = template.Must(template.ParseFiles("templates/index.html"))
-var scriptTemplate = template.Must(template.ParseFiles("templates/script.html")).Funcs(templateFuncs)
+var scriptTemplate = template.Must(template.ParseFiles("templates/script.html"))
 var authorTemplate = template.Must(template.ParseFiles("templates/author.html"))
 var submitTemplate = template.Must(template.ParseFiles("templates/submit.html"))
 
@@ -72,12 +60,15 @@ func script(w http.ResponseWriter, r *http.Request) {
 	var script Script
 	err := datastore.Get(c, key, &script)
 	if err != nil {
+		c.Errorf("datastore get error: %+v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
 
 	if err := scriptTemplate.Execute(w, script); err != nil {
+		c.Errorf("script template error: %+v", err)
 		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
 	}
 }
 

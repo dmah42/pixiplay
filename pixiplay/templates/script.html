@@ -37,8 +37,8 @@
 					<a href="#" class="dropdown-toggle" data-toggle="dropdown">select game<span class="caret"></span></a>
 					<ul class="dropdown-menu" role="menu">
 						<!-- TODO: all the scripts with the current one active -->
-						<li {{ if .Name eq "sin" }}class="active"{{ end }}><a href="/script/sin">sin</a></li>
-						<li {{ if .Name eq "another" }}class="active"{{ end }}><a href="/script/another">another</a></li>
+						<li {{ if eq .Name "sin" }}class="active"{{ end }}><a href="/script/sin">sin</a></li>
+						<li {{ if eq .Name "another" }}class="active"{{ end }}><a href="/script/another">another</a></li>
 					</ul>
 				</li>
 			</ul>
@@ -47,7 +47,7 @@
 </nav>
 
 <div class="container drop-top">
-	<h1>{{.Name}}<small>by {{.Author}}</small></h1>
+	<h1>{{.Name}}<small> by {{.Author}}</small></h1>
 	<div class="center-block">
 		<canvas id="canvas" width="512" height="480"></canvas>
 	</div>
