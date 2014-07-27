@@ -103,10 +103,10 @@ func submit(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
+		// TODO: post to blobstore url instead
 		if err := submitTemplate.Execute(w, scripts); err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
 		}
-		// TODO: 'test' link
 	} else if (r.Method == "POST") {
 		// TODO: authenticate and set 'author' name
 		script := &Script {
@@ -114,7 +114,9 @@ func submit(w http.ResponseWriter, r *http.Request) {
 			Author: r.FormValue("author"),
 			Content: r.FormValue("content"),
 		}
-
+		// TODO: redirect to test page here before submitting. then do actual submit.
+		// test page needs to delete blob if orphaned. maybe just run a cron to prune
+		// orphans regularly.
 		key := datastore.NewKey(c, "Script", script.Name, 0, nil)
 		_, err := datastore.Put(c, key, script)
 		if err != nil {
